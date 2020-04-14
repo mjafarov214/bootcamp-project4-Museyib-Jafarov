@@ -11,7 +11,6 @@ let valuteToAll = document.querySelector("#to-section-valute");
 
 let lastSearch = "";
 
-
 // Получем все актуальные валюты из сервера
 let list = fetch(`https://api.ratesapi.io/api/latest`)
   .then((result) => {
@@ -24,7 +23,7 @@ let list = fetch(`https://api.ratesapi.io/api/latest`)
     return rate;
   });
 
-// Функция записывающая все эти валюты в один лист  
+// Функция записывающая все эти валюты в один лист
 function makeList(obj) {
   let objectToInspect;
   let result = [];
@@ -136,16 +135,17 @@ function reverseConvert() {
 }
 
 // Функция которая округляет дробную часть числа для красоты:)
-function roundPlus(x, n) { //x - число, n - количество знаков
-    if(isNaN(x) || isNaN(n)) return false;
-    let m = Math.pow(10,n);
-    return Math.round(x*m)/m;
-    }
-
+function roundPlus(x, n) {
+  //x - число, n - количество знаков
+  if (isNaN(x) || isNaN(n)){ return false;}
+  let m = Math.pow(10, n);
+  return Math.round(x * m) / m;
+}
 
 //Функция которая отвечает за ввод на левой стороне
 inputFrom.addEventListener("input", calculate);
 function calculate() {
+  inputFrom.value = cleanAllwords(inputFrom.value);
   const currentValuteFrom = document
     .querySelector("#from-section-valute .valuteSelect")
     .innerHTML.slice(0, 3);
@@ -167,8 +167,8 @@ function calculate() {
       return rate;
     })
     .then((rate) => {
-      result = inputFrom.value * rate[currentValuteTo];
-      inputTo.value =roundPlus(result,3)
+      let result = inputFrom.value * rate[currentValuteTo];
+      inputTo.value = roundPlus(result, 3);
       infoFrom.innerHTML = `1 ${currentValuteFrom} = ${rate[currentValuteTo]} ${currentValuteTo}`;
     });
   fetch(
@@ -185,12 +185,14 @@ function calculate() {
     })
     .then((rate) => {
       infoTo.innerHTML = `1 ${currentValuteTo} = ${rate[currentValuteFrom]} ${currentValuteFrom}`;
-    });
+    })
+    .catch(() => alert(`Что-то пошло не так :-( \nПросим попробывать позже.`));
 }
 
 //Функция которая отвечает за ввод на правой стороне
 inputTo.addEventListener("input", calculateTo);
 function calculateTo() {
+  inputTo.value = cleanAllwords(inputTo.value);
   const currentValuteFrom = document
     .querySelector("#from-section-valute .valuteSelect")
     .innerHTML.slice(0, 3);
@@ -227,10 +229,30 @@ function calculateTo() {
       return rate;
     })
     .then((rate) => {
-      result = inputTo.value * rate[currentValuteFrom];
-      inputFrom.value =roundPlus(result,3)
+      let result = inputTo.value * rate[currentValuteFrom];
+      inputFrom.value = roundPlus(result, 3);
       infoTo.innerHTML = `1 ${currentValuteTo} = ${rate[currentValuteFrom]} ${currentValuteFrom}`;
-    });
+    })
+    .catch(() => alert(`Что-то пошло не так :-( \nПросим попробывать позже.`));
+}
+
+function cleanAllwords(input) {
+  let dirtyInput = input;
+  let cleanInput = "";
+  let isFirstDot = true;
+  for (let i = 0; i < dirtyInput.length; i++) {
+    if (isFirstDot && (dirtyInput[i] === "." || dirtyInput[i] === ",")) {
+      cleanInput += dirtyInput[i];
+      isFirstDot = false;
+    }
+    if (!isNaN(dirtyInput[i])) {
+      cleanInput += dirtyInput[i];
+    }
+    if (dirtyInput.length == 1 && dirtyInput[i] == ".") {
+      cleanInput = "";
+    }
+  }
+  return cleanInput.replace(",", ".");
 }
 
 changeValuteTo();
